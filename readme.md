@@ -6,6 +6,6 @@ whit JellyFin, some files are 4K resolution and have some strange encoding that 
 
 Create a script that looks for media files, check if resolution is greater than 1920x1080 and converts it in that resolution, then checks for the format and converts all in a format that my i pad air can work with. All the conversion is done with ffmpeg via command line so you don't have to install python libraries
 ## Project Overview
-This is still a WIP
+ATM you can run the script and specify in the code the folder that you want to work with, after that it looks for all files in a higher format than 1920x1080 and converts them in 1920x1080 creating a new file that starts with NEW_ and not deleting the old one
 ## License
 [AGPL-3.0](https://choosealicense.com/licenses/agpl-3.0/)

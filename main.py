@@ -2,7 +2,7 @@ import os
 import subprocess
 
 
-def getListOfFiles(dirName):
+def getListOfFiles(dirName):    #Function found on the web
     # create a list of file and sub directories
     # names in the given directory
     listOfFile = os.listdir(dirName)
@@ -19,6 +19,7 @@ def getListOfFiles(dirName):
 
     return allFiles
 
+#Function that uses the ffprobe console command to give the X and Y resolution
 def getResolution(file):
     resolution = str(subprocess.Popen(
         "ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 \'" + file+"\'", shell=True,
@@ -30,12 +31,21 @@ def getResolution(file):
     y=int(resolution.split("x")[1])
     return (x,y)
 
+#Function that converts the file to 1920x1080 then removes the old file
 def convertTo1080(file):
-    conversionCommand = str(subprocess.Popen(
-        "ffmpeg -i \'"+file+"\' -map 0 -c:v libx264 -crf 18 -vf format=yuv420p -c:a copy \'NEW_"+file+"\' -threads 10",
+    splittedFile=file.split("/")
+    splittedFile[-1]="NEW_"+splittedFile[-1]
+    outputFile=""
+    for part in splittedFile:
+        outputFile=outputFile+part+"/"
+    outputFile = outputFile[:-1]
+    child = subprocess.Popen("ffmpeg -i '"+file+"' -vf scale=1920:1080 '"+outputFile+"' -threads 10",
         shell=True,
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0])
-    print(conversionCommand)
+       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    streamdata = child.communicate()[0]
+    rc = child.returncode
+    print(rc)
+
     #removeCommand = str(subprocess.Popen(
     #    "rm \'"+file+"\'",
     #    shell=True,
@@ -53,12 +63,9 @@ if __name__ == '__main__':
         print(str(resolutionX)+" "+str(resolutionY))
         if resolutionX>1920 and resolutionY>1080 and resolutionX%1920==0 and resolutionY%1080==0:
             print("Converting to 1920x1080:")
-            #convertTo1080(file)
+            convertTo1080(file)
             print("Conversion ended")
+            (resolutionX, resolutionY) = getResolution(file)
+            print("New resolution:"+str(resolutionX) + " " + str(resolutionY))
 
-
-
-
-
-
-
+#"ffmpeg -i 'Moon.Knight.S01E02.Evoca.il.costume.iTALiAN.MULTi.2160p.WEB-DL.DDP5.1.HDR.H.265-MeM.GP.mkv' -vf scale=1920:1080 'NEW_Moon.Knight.S01E02.Evoca.il.costume.iTALiAN.MULTi.2160p.WEB-DL.DDP5.1.HDR.H.265-MeM.GP.mkv' -threads 10"
