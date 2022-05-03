@@ -4,6 +4,7 @@ import time
 
 THREADS = 6
 DELAY = 15
+FOLDER = "series"
 
 
 def getListOfFiles(dirName):    #Function found on the web
@@ -136,7 +137,7 @@ def convertToH264(file):
 
 if __name__ == '__main__':
     while True:
-        files = getListOfFiles("series")
+        files = getListOfFiles(FOLDER)
         for file in files:
             print(file)
             (resolutionX,resolutionY) = getResolution(file)
