@@ -152,4 +152,4 @@ if __name__ == '__main__':
                 print("Converting to h264")
                 convertToH264(file)
                 print("Conversion ended")
-            time.sleetp(60*DELAY)
+            time.sleep(60*DELAY)
