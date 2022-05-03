@@ -24,6 +24,8 @@ def getResolution(file):
     resolution = str(subprocess.Popen(
         "ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 \'" + file+"\'", shell=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0])
+    if resolution=="" or "x" not in resolution:
+        return(0,0)
     resolution = resolution.replace("b", "")
     resolution = resolution.replace("\\n", "")
     resolution = resolution.replace("'", "")
@@ -39,21 +41,40 @@ def convertTo1080(file):
     for part in splittedFile:
         outputFile=outputFile+part+"/"
     outputFile = outputFile[:-1]
+
     child = subprocess.Popen("ffmpeg -i '"+file+"' -vf scale=1920:1080 '"+outputFile+"' -threads 10",
         shell=True,
        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     streamdata = child.communicate()[0]
     rc = child.returncode
-    print(rc)
-
-    #removeCommand = str(subprocess.Popen(
-    #    "rm \'"+file+"\'",
-    #    shell=True,
-    #    stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0])
-    #moveCommand = str(subprocess.Popen(
-    #    "mv \'NEW_" + file + "\' \'"+file+"\'",
-    #    shell=True,
-    #    stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0])
+    if rc==0 or rc=='0' or rc=="0":
+        (resolutionX, resolutionY) = getResolution(outputFile)
+        print("New resolution: " + str(resolutionX) + " " + str(resolutionY))
+        if resolutionX==1920 and resolutionY==1080:
+            print("Removing file "+file)
+            removeCommand = str(subprocess.Popen(
+               "rm \'"+file+"\'",
+                shell=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0])
+            print("Renaming file "+outputFile+" to "+file)
+            moveCommand = str(subprocess.Popen(
+            "mv \'" + outputFile + "\' \'"+file+"\'",
+            shell=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0])
+        else:
+            print("Wrong resolution of the new Output found, cleaning")
+            print("Removing file " + file)
+            removeCommand = str(subprocess.Popen(
+                "rm \'" + outputFile + "\'",
+                shell=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0])
+    else:
+        print("Error during conversion, cleaning")
+        print("Removing file " + file)
+        removeCommand = str(subprocess.Popen(
+            "rm \'" + outputFile + "\'",
+            shell=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0])
 
 if __name__ == '__main__':
     files = getListOfFiles("series")
@@ -65,7 +86,5 @@ if __name__ == '__main__':
             print("Converting to 1920x1080:")
             convertTo1080(file)
             print("Conversion ended")
-            (resolutionX, resolutionY) = getResolution(file)
-            print("New resolution:"+str(resolutionX) + " " + str(resolutionY))
 
-#"ffmpeg -i 'Moon.Knight.S01E02.Evoca.il.costume.iTALiAN.MULTi.2160p.WEB-DL.DDP5.1.HDR.H.265-MeM.GP.mkv' -vf scale=1920:1080 'NEW_Moon.Knight.S01E02.Evoca.il.costume.iTALiAN.MULTi.2160p.WEB-DL.DDP5.1.HDR.H.265-MeM.GP.mkv' -threads 10"
+
