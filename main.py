@@ -1,6 +1,8 @@
 import os
 import subprocess
 import time
+from datetime import datetime, time as t
+
 
 THREADS = "6"
 DELAY = 15
@@ -75,7 +77,7 @@ def convertTo1080(file):
         outputFile = outputFile + part + "/"
     outputFile = outputFile[:-1]
 
-    child = subprocess.Popen("ffmpeg -i '" + file + "' -vf scale=1920:1080 '" + outputFile + "' -threads " + THREADS,
+    child = subprocess.Popen("ffmpeg -i '" + file + "' -map 0 -vf scale=1920:1080 '" + outputFile + "' -threads " + THREADS,
                              shell=True,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     streamdata = child.communicate()[0]
@@ -203,26 +205,35 @@ def convertToH264(file):
 
 
 if __name__ == '__main__':
+    print("HELLO WORLD!")
     while True:
-        files = getListOfFiles(FOLDER)
-        for file in files:
-            print(file)
-            (resolutionX, resolutionY) = getResolution(file)
-            print(str(resolutionX) + " " + str(resolutionY))
-            if resolutionX > 1920 and resolutionY > 1080 and resolutionX % 1920 == 0 and resolutionY % 1080 == 0:
-                print("Converting to 1920x1080:")
-                convertTo1080(file)
-                print("Conversion ended")
-            codec = getCodec(file)
-            print("Coded: " + codec)
-            if codec == "hevc":
-                print("Converting to h264")
-                convertToH264(file)
-                print("Conversion ended")
-            hdrSdr = getHDRSDR(file)
-            print("HDR/SDR: " + hdrSdr)
-            if hdrSdr == "BT.2020" or hdrSdr == "REC.2020":
-                print("Converting to sdr")
-                convertTosdr(file)
-                print("Conversion sdr")
+        current_time = datetime.now().time()
+        start_time = t(23, 0)  # 23:00
+        end_time = t(7, 0)  # 07:00
+
+        if start_time <= current_time <= end_time:
+            print("Correct time")
+            files = getListOfFiles(FOLDER)
+            for file in files:
+                print(file)
+                (resolutionX, resolutionY) = getResolution(file)
+                print(str(resolutionX) + " " + str(resolutionY))
+                if resolutionX > 1920 and resolutionY > 1080 and resolutionX % 1920 == 0 and resolutionY % 1080 == 0:
+                    print("Converting to 1920x1080:")
+                    convertTo1080(file)
+                    print("Conversion ended")
+                codec = getCodec(file)
+                print("Coded: " + codec)
+                if codec == "hevc":
+                    print("Converting to h264")
+                    convertToH264(file)
+                    print("Conversion ended")
+                hdrSdr = getHDRSDR(file)
+                print("HDR/SDR: " + hdrSdr)
+                if hdrSdr == "BT.2020" or hdrSdr == "REC.2020":
+                    print("Converting to sdr")
+                    convertTosdr(file)
+                    print("Conversion sdr")
+        else:
+            print("Not in correct time")
         time.sleep(60 * DELAY)
